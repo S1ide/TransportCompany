@@ -3,7 +3,6 @@ package org.example;
 import org.example.dataset.PieDataSet;
 import org.example.models.Carrier;
 import org.example.models.Manager;
-import org.jfree.data.general.PieDataset;
 
 import javax.swing.*;
 import java.util.Random;
@@ -25,12 +24,12 @@ public class Main {
         for (; currentDay < countOfDays; currentDay++) {
 
             Random random = new Random();
-            int K = random.nextInt(100, 500);
-            int L = random.nextInt(1, 15);
-            manager.next();
-            if (currentDay == nextOrderDay) {
-                manager.receiveNewOrder(K, L);
-                nextOrderDay = currentDay + random.nextInt(2, 8);
+            int K = random.nextInt(100, 500); // случайное число товаров от 100 до 500 шт.
+            int L = random.nextInt(1, 15); // случайное расстояние
+            manager.next(); // наступление нового дня
+            if (currentDay == nextOrderDay) { //проверка, является ли сегодняшний день днём заказа
+                manager.receiveNewOrder(K, L); //отправка заказа менеджеру
+                nextOrderDay = currentDay + random.nextInt(2, 8); // генерация следующей даты заказа
             }
         }
 
@@ -42,6 +41,7 @@ public class Main {
                 "Перевозчик: %d\n", carrier.getCountOfOrders(), carrier.getId()));
         manager.getAllCarriers().forEach(carrier -> System.out.printf("Число дней без заказов: %d\t Перевозчик: %d\n",
                 carrier.getCountDaysWithoutOrders(), carrier.getId()));
-        System.out.println(manager.getDaysWithoutOrders());
+
+
     }
 }

@@ -1,12 +1,8 @@
 package org.example.models;
 
-
-import org.example.Main;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import static org.example.Main.currentDay;
@@ -15,10 +11,7 @@ import static org.example.Main.currentDay;
 public class Manager {
 
 
-    private ArrayList<Carrier> allCarriers;
-    private int daysWithoutOrders = 0;
-    private List<Carrier> carriersWithOffers;
-    private boolean isProcessesOffers = false;
+    private final ArrayList<Carrier> allCarriers;
     private boolean isOfferReady = false;
     private int timeManagerProcessesIsReady;
     private int K;
@@ -30,34 +23,27 @@ public class Manager {
 
     public void receiveNewOrder(int K, int L) {
         System.out.printf("Получен новый заказ.\tЧисло товаров: %d\tРасстояние: %d\n", K, L);
-        sendOrderForCarriers();
+        sendOrderForCarriers(); //рассылка заказов перевозчикам
         this.K = K;
         this.L = L;
-//        catch (NoSuchElementException exception){
-//            System.out.println("Нет свободных перевозчиков, в заказе отказано");
-//            daysWithoutOrders++;
-//        }
     }
 
     public void next() {
         System.out.printf("День номер: %d\n", currentDay);
-        refresh();
-        carriersWithOffers = allCarriers.stream().filter(Carrier::isAvailableForOder).filter(Carrier::isOfferReady).collect(Collectors.toList());
-        if (carriersWithOffers.size() != 0 && !isOfferReady) timeManagerProcessesIsReady = currentDay + 1;
-        if (isOfferReady) {
-            receiveBestCarrier(carriersWithOffers, K, L).getOrder(K, L);
-            sendRejectForOthers();
-            isOfferReady = false;
+        refresh(); //обновление статусов менеджера и перевозчиков
+        List<Carrier> carriersWithOffers = allCarriers.stream().filter(Carrier::isAvailableForOder)
+                .filter(Carrier::isOfferReady).collect(Collectors.toList()); //получение перевозчиков с предложениями
+        if (carriersWithOffers.size() != 0 && !isOfferReady) timeManagerProcessesIsReady = currentDay + 1; //обработка предложений, если есть таковые
+        if (isOfferReady) { //если менеджер обработал предложения
+            receiveBestCarrier(carriersWithOffers, K, L).getOrder(K, L); //заказ отправляется лучшему перевозчику
+            sendRejectForOthers(); //остальным отказ
+            isOfferReady = false; // предложение возращается в изначальный статус, не готово
         }
     }
 
     private static Carrier receiveBestCarrier(List<Carrier> carriers, int K, int L) {
         return carriers.stream().filter(Carrier::isAvailableForOder)
                 .min(Comparator.comparingDouble(o -> o.getPriceForCarriage(K, L))).orElseThrow();
-    }
-
-    public int getDaysWithoutOrders() {
-        return daysWithoutOrders;
     }
 
     private void sendOrderForCarriers() {
